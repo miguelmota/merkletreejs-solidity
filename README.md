@@ -44,7 +44,7 @@ const MerkleTree = require('merkletreejs')
 const keccak256 = require('keccak256')
 
 const buf2hex = x => '0x'+x.toString('hex')
-cosnt contract = await MerkleProof.new()
+const contract = await MerkleProof.new()
 
 const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x))
 const tree = new MerkleTree(leaves, keccak256)
