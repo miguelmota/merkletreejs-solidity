@@ -14,25 +14,30 @@ contract('Contracts', (accounts) => {
   context('MerkleProof', () => {
     describe('merkle proofs', () => {
       it('should return true for valid merkle proof', async () => {
-        const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x))
+        const leaves = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map(x => keccak256(x)).sort(Buffer.compare)
         const tree = new MerkleTree(leaves, keccak256)
-        const root = buf2hex(tree.getRoot())
-        const leaf = buf2hex(tree.getLeaves()[0])
-        const proof = tree.getProof(leaves[0]).map(x => buf2hex(x.data))
+        const root = tree.getRoot()
+        const hexroot = buf2hex(root)
+        const leaf = keccak256('d')
+        const hexleaf = buf2hex(keccak256('d'))
+        const proof = tree.getProof(keccak256('d'))
+        const hexproof = tree.getProof(keccak256('d')).map(x => buf2hex(x.data))
 
-        const verified = await contract.verify.call(proof, root, leaf)
+        verified = await contract.verify.call(hexproof, hexroot, hexleaf)
         assert.equal(verified, true)
+
+        assert.equal(tree.verify(proof, leaf, root), true)
       })
 
       it('should return false for invalid merkle proof', async () => {
-        const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x))
+        const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x)).sort(Buffer.compare)
         const tree = new MerkleTree(leaves, keccak256)
         const root = buf2hex(tree.getRoot())
-        const leaf = buf2hex(tree.getLeaves()[0])
+        const leaf = buf2hex(keccak256('b'))
 
-        const badLeaves = ['a', 'b', 'c', 'x'].map(x => keccak256(x))
+        const badLeaves = ['a', 'b', 'c', 'x'].map(x => keccak256(x)).sort(Buffer.compare)
         const badTree = new MerkleTree(badLeaves, keccak256)
-        const badProof = badTree.getProof(badLeaves[0]).map(x => buf2hex(x.data))
+        const badProof = badTree.getProof(keccak256('b')).map(x => buf2hex(x.data))
 
         const verified = await contract.verify.call(badProof, root, leaf)
         assert.equal(verified, false)
@@ -40,12 +45,14 @@ contract('Contracts', (accounts) => {
 
       it('should return false for a merkle proof of invalid length', async () => {
         const leaves = ['a', 'b', 'c'].map(x => keccak256(x))
+        leaves.sort(Buffer.compare)
         const tree = new MerkleTree(leaves, keccak256)
         const root = buf2hex(tree.getRoot())
-        const leaf = buf2hex(tree.getLeaves()[0])
-        const proof = tree.getProof(leaves[0]).map(x => buf2hex(x.data))
+        const leaf = buf2hex(keccak256('c'))
+        const proof = tree.getProof(keccak256('c')).map(x => buf2hex(x.data))
+        const badProof = proof.slice(0, proof.length-2)
 
-        const verified = await contract.verify.call(proof, root, leaf)
+        const verified = await contract.verify.call(badProof, root, leaf)
         assert.equal(verified, false)
       })
     })

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.23;
 
 contract MerkleProof {
-
+  /// note: requires proof to be sorted
   function verify(
     bytes32[] proof,
     bytes32 root,

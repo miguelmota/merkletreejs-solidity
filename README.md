@@ -46,11 +46,11 @@ const keccak256 = require('keccak256')
 const buf2hex = x => '0x'+x.toString('hex')
 const contract = await MerkleProof.new()
 
-const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x))
+const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x)).sort(Buffer.compare)
 const tree = new MerkleTree(leaves, keccak256)
 const root = buf2hex(tree.getRoot())
-const leaf = buf2hex(tree.getLeaves()[0])
-const proof = tree.getProof(leaves[0]).map(x => buf2hex(x.data))
+const leaf = buf2hex(keccak256('a'))
+const proof = tree.getProof(keccak256('a')).map(x => buf2hex(x.data))
 
 const verified = await contract.verify.call(proof, root, leaf)
 
