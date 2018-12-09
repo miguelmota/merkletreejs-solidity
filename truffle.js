@@ -22,4 +22,15 @@ module.exports = {
       network_id: '*', // Match any network id
     },
   },
+  compilers: {
+    solc: {
+      version: '0.4.23',
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        },
+      },
+    },
+  },
 };
