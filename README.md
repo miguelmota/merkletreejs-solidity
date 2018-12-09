@@ -11,9 +11,10 @@ pragma solidity ^0.4.23;
 
 contract MerkleProof {
   function verify(
-    bytes32[] proof,
     bytes32 root,
-    bytes32 leaf
+    bytes32 leaf,
+    bytes32[] proof,
+    uint256 []positions
   )
     public
     pure
@@ -24,7 +25,7 @@ contract MerkleProof {
     for (uint256 i = 0; i < proof.length; i++) {
       bytes32 proofElement = proof[i];
 
-      if (computedHash < proofElement) {
+      if (positions[i] == 1) {
         computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
       } else {
         computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
@@ -51,8 +52,9 @@ const tree = new MerkleTree(leaves, keccak256)
 const root = buf2hex(tree.getRoot())
 const leaf = buf2hex(keccak256('a'))
 const proof = tree.getProof(keccak256('a')).map(x => buf2hex(x.data))
+const positions = tree.getProof(keccak256('a')).map(x => x.position === 'right' ? 1 : 0)
 
-const verified = await contract.verify.call(proof, root, leaf)
+const verified = await contract.verify.call(root, leaf, proof, positions)
 
 console.log(verified) // true
 ```

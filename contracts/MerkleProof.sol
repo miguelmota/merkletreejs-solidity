@@ -1,11 +1,11 @@
 pragma solidity ^0.4.23;
 
 contract MerkleProof {
-  /// note: requires proof to be sorted
   function verify(
-    bytes32[] proof,
     bytes32 root,
-    bytes32 leaf
+    bytes32 leaf,
+    bytes32[] proof,
+    uint256 []positions
   )
     public
     pure
@@ -16,7 +16,7 @@ contract MerkleProof {
     for (uint256 i = 0; i < proof.length; i++) {
       bytes32 proofElement = proof[i];
 
-      if (computedHash < proofElement) {
+      if (positions[i] == 1) {
         // Hash(current computed hash + current element of the proof)
         computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
       } else {
