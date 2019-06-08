@@ -21,11 +21,22 @@ contract('Contracts', (accounts) => {
           sortPairs: true,
         })
         const root = tree.getHexRoot()
-        const leaf = tree.leaves[0]
+        const leaf = keccak256('a')
         const proof = tree.getHexProof(leaf)
 
         const verified = await contract.verify.call(root, leaf, proof)
         assert.equal(verified, true)
+
+        const badLeaves = ['a', 'b', 'x', 'd']
+        const badTree = new MerkleTree(badLeaves, keccak256, {
+          hashLeaves: true,
+          sortLeaves: true,
+          sortPairs: true,
+        })
+        const badProof = badTree.getHexProof(leaf)
+
+        const badVerified = await contract.verify.call(root, leaf, badProof)
+        assert.equal(badVerified, false)
       })
 
       it('should return true for valid merkle proof', async () => {

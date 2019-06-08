@@ -46,7 +46,6 @@ const MerkleProof = artifacts.require('MerkleProof')
 const MerkleTree = require('merkletreejs')
 const keccak256 = require('keccak256')
 
-const buf2hex = x => '0x'+x.toString('hex')
 const contract = await MerkleProof.new()
 
 const leaves = ['a', 'b', 'c', 'd']
@@ -56,12 +55,18 @@ const tree = new MerkleTree(leaves, keccak256, {
   sortPairs: true,
 })
 const root = tree.getHexRoot()
-const leaf = tree.leaves[0]
+const leaf = keccak256('a')
 const proof = tree.getHexProof(leaf)
+console.log(await contract.verify.call(root, leaf, proof)) // true
 
-const verified = await contract.verify.call(root, leaf, proof)
-
-console.log(verified) // true
+const badLeaves = ['a', 'b', 'x', 'd']
+const badTree = new MerkleTree(badLeaves, keccak256, {
+  hashLeaves: true,
+  sortLeaves: true,
+  sortPairs: true,
+})
+const badProof = badTree.getHexProof(leaf)
+console.log(await contract.verify.call(root, leaf, badProof)) // false
 ```
 
 ## Test
