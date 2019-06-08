@@ -7,14 +7,13 @@
 [`contracts/MerkleProof.sol`](./contracts/MerkleProof.sol)
 
 ```solidity
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.2;
 
 contract MerkleProof {
   function verify(
     bytes32 root,
     bytes32 leaf,
-    bytes32[] proof,
-    uint256 []positions
+    bytes32[] memory proof
   )
     public
     pure
@@ -25,13 +24,16 @@ contract MerkleProof {
     for (uint256 i = 0; i < proof.length; i++) {
       bytes32 proofElement = proof[i];
 
-      if (positions[i] == 1) {
+      if (computedHash < proofElement) {
+        // Hash(current computed hash + current element of the proof)
         computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
       } else {
+        // Hash(current element of the proof + current computed hash)
         computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
       }
     }
 
+    // Check if the computed hash (root) is equal to the provided root
     return computedHash == root;
   }
 }
@@ -47,14 +49,17 @@ const keccak256 = require('keccak256')
 const buf2hex = x => '0x'+x.toString('hex')
 const contract = await MerkleProof.new()
 
-const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x)).sort(Buffer.compare)
-const tree = new MerkleTree(leaves, keccak256)
-const root = buf2hex(tree.getRoot())
-const leaf = buf2hex(keccak256('a'))
-const proof = tree.getProof(keccak256('a')).map(x => buf2hex(x.data))
-const positions = tree.getProof(keccak256('a')).map(x => x.position === 'right' ? 1 : 0)
+const leaves = ['a', 'b', 'c', 'd']
+const tree = new MerkleTree(leaves, keccak256, {
+  hashLeaves: true,
+  sortLeaves: true,
+  sortPairs: true,
+})
+const root = tree.getHexRoot()
+const leaf = tree.leaves[0]
+const proof = tree.getHexProof(leaf)
 
-const verified = await contract.verify.call(root, leaf, proof, positions)
+const verified = await contract.verify.call(root, leaf, proof)
 
 console.log(verified) // true
 ```
