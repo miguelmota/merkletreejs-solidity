@@ -14,12 +14,8 @@ contract('Contracts', (accounts) => {
   context('MerkleProof', () => {
     describe('merkle proofs', () => {
       it('should return true for valid merkle proof (example)', async () => {
-        const leaves = ['a', 'b', 'c', 'd']
-        const tree = new MerkleTree(leaves, keccak256, {
-          hashLeaves: true,
-          sortLeaves: true,
-          sortPairs: true,
-        })
+        const leaves = ['a', 'b', 'c', 'd'].map(v => keccak256(v))
+        const tree = new MerkleTree(leaves, keccak256, { sort: true })
         const root = tree.getHexRoot()
         const leaf = keccak256('a')
         const proof = tree.getHexProof(leaf)
@@ -27,12 +23,8 @@ contract('Contracts', (accounts) => {
         const verified = await contract.verify.call(root, leaf, proof)
         assert.equal(verified, true)
 
-        const badLeaves = ['a', 'b', 'x', 'd']
-        const badTree = new MerkleTree(badLeaves, keccak256, {
-          hashLeaves: true,
-          sortLeaves: true,
-          sortPairs: true,
-        })
+        const badLeaves = ['a', 'b', 'x', 'd'].map(v => keccak256(v))
+        const badTree = new MerkleTree(badLeaves, keccak256, { sort: true })
         const badProof = badTree.getHexProof(leaf)
 
         const badVerified = await contract.verify.call(root, leaf, badProof)
@@ -40,8 +32,8 @@ contract('Contracts', (accounts) => {
       })
 
       it('should return true for valid merkle proof', async () => {
-        const leaves = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map(x => keccak256(x))
-        const tree = new MerkleTree(leaves, keccak256, { sortLeaves: true, sortPairs: true })
+        const leaves = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map(v => keccak256(v))
+        const tree = new MerkleTree(leaves, keccak256, { sort: true })
         const root = tree.getRoot()
         const hexroot = buf2hex(root)
         const leaf = keccak256('d')
@@ -56,12 +48,12 @@ contract('Contracts', (accounts) => {
       })
 
       it('should return false for invalid merkle proof', async () => {
-        const leaves = ['a', 'b', 'c', 'd'].map(x => keccak256(x))
-        const tree = new MerkleTree(leaves, keccak256, { sortLeaves: true, sortPairs: true })
+        const leaves = ['a', 'b', 'c', 'd'].map(v => keccak256(v))
+        const tree = new MerkleTree(leaves, keccak256, { sort: true })
         const root = buf2hex(tree.getRoot())
         const leaf = buf2hex(keccak256('b'))
 
-        const badLeaves = ['a', 'b', 'c', 'x'].map(x => keccak256(x))
+        const badLeaves = ['a', 'b', 'c', 'x'].map(v => keccak256(v))
         const badTree = new MerkleTree(badLeaves, keccak256)
         const badProof = badTree.getProof(keccak256('b')).map(x => buf2hex(x.data))
 
@@ -70,8 +62,8 @@ contract('Contracts', (accounts) => {
       })
 
       it('should return false for a merkle proof of invalid length', async () => {
-        const leaves = ['a', 'b', 'c'].map(x => keccak256(x))
-        const tree = new MerkleTree(leaves, keccak256, { sortLeaves: true, sortPairs: true })
+        const leaves = ['a', 'b', 'c'].map(v => keccak256(v))
+        const tree = new MerkleTree(leaves, keccak256, { sort: true })
         const root = buf2hex(tree.getRoot())
         const leaf = buf2hex(keccak256('c'))
         const proof = tree.getProof(keccak256('c'))
@@ -82,8 +74,8 @@ contract('Contracts', (accounts) => {
       })
 
       it('should return true for valid merkle proof (SO#63509)', async () => {
-        const leaves = ['0x00000a86986e8ba3557992df02883e4a646e8f25 50000000000000000000', '0x00009c99bffc538de01866f74cfec4819dc467f3 75000000000000000000', '0x00035a5f2c595c3bb53aae4528038dd7a85641c3 50000000000000000000', '0x1e27c325ba246f581a6dcaa912a8e80163454c75 10000000000000000000'].map(x => keccak256(x))
-        const tree = new MerkleTree(leaves, keccak256, { sortLeaves: true, sortPairs: true })
+        const leaves = ['0x00000a86986e8ba3557992df02883e4a646e8f25 50000000000000000000', '0x00009c99bffc538de01866f74cfec4819dc467f3 75000000000000000000', '0x00035a5f2c595c3bb53aae4528038dd7a85641c3 50000000000000000000', '0x1e27c325ba246f581a6dcaa912a8e80163454c75 10000000000000000000'].map(v => keccak256(v))
+        const tree = new MerkleTree(leaves, keccak256, { sort: true })
         const root = tree.getRoot()
         const hexroot = buf2hex(root)
         const leaf = keccak256('0x1e27c325ba246f581a6dcaa912a8e80163454c75 10000000000000000000')
