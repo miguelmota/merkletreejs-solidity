@@ -15,7 +15,9 @@
     "moment": "^2.22.2",
     "web3-utils": "^1.0.0-beta.36"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "truffle": "^5.0.44"
+  },
   "scripts": {
     "test": "truffle test"
   },
