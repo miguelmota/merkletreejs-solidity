@@ -12,14 +12,14 @@ pragma solidity ^0.5.2;
 contract MerkleProof {
   function verify(
     bytes32 root,
-    bytes32 leaf,
+    uint256 amount,
     bytes32[] memory proof
   )
     public
-    pure
+    view
     returns (bool)
   {
-    bytes32 computedHash = leaf;
+    bytes32 computedHash = keccak256(abi.encodePacked(msg.sender, amount));
 
     for (uint256 i = 0; i < proof.length; i++) {
       bytes32 proofElement = proof[i];
@@ -45,20 +45,25 @@ contract MerkleProof {
 const MerkleProof = artifacts.require('MerkleProof')
 const MerkleTree = require('merkletreejs')
 const keccak256 = require('keccak256')
+const { soliditySha3 } = require('web3-utils')
 
 const contract = await MerkleProof.new()
 
-const leaves = ['a', 'b', 'c', 'd'].map(v => keccak256(v))
+const leaves = accounts.map((account, i) => soliditySha3(
+  { type: 'address', value: account },
+  { type: 'uint256', value: i+1 } // simulate amount
+))
 const tree = new MerkleTree(leaves, keccak256, { sort: true })
 const root = tree.getHexRoot()
-const leaf = keccak256('a')
-const proof = tree.getHexProof(leaf)
-console.log(await contract.verify.call(root, leaf, proof)) // true
 
-const badLeaves = ['a', 'b', 'x', 'd'].map(v => keccak256(v))
-const badTree = new MerkleTree(badLeaves, keccak256, { sort: true })
-const badProof = badTree.getHexProof(leaf)
-console.log(await contract.verify.call(root, leaf, badProof)) // false
+const amount = 1
+const leaf = soliditySha3(
+  { type: 'address', value: accounts[0] },
+  { type: 'uint256', value: amount }
+)
+const proof = tree.getHexProof(leaf)
+console.log(await contract.verify.call(root, amount, proof)) // true
+
 ```
 
 ## Test
