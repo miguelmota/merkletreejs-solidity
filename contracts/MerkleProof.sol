@@ -3,14 +3,14 @@ pragma solidity ^0.5.2;
 contract MerkleProof {
   function verify(
     bytes32 root,
-    bytes32 leaf,
+    uint256 amount,
     bytes32[] memory proof
   )
     public
-    pure
+    view
     returns (bool)
   {
-    bytes32 computedHash = leaf;
+    bytes32 computedHash = keccak256(abi.encodePacked(msg.sender, amount));
 
     for (uint256 i = 0; i < proof.length; i++) {
       bytes32 proofElement = proof[i];
